@@ -5,18 +5,30 @@ import * as Checkbox from "@radix-ui/react-checkbox";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 
 import { Input } from "./Form/Input";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { GameListData } from "../App";
 
 export function CreateAdModal() {
   const [games, setGames] = useState<GameListData[]>([]);
   const [weekDays, setWeekDays] = useState<string[]>([]);
+  const [useVoiceChannel, setUseVoiceChannel] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:3333/games")
       .then((res) => res.json())
       .then((data) => setGames(data));
   }, []);
+
+  const handleCreateAd = (event: FormEvent) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target as HTMLFormElement);
+
+    const data = Object.fromEntries(formData);
+
+    console.log("foi ", data, formData);
+    console.log(useVoiceChannel);
+  };
 
   return (
     <Dialog.Portal>
@@ -27,12 +39,13 @@ export function CreateAdModal() {
           Publique um anúncio
         </Dialog.Title>
 
-        <form className="mt-8 flex flex-col gap-4">
+        <form onSubmit={handleCreateAd} className="mt-8 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="game" className="font-semibold">
               Qual o game?
             </label>
             <select
+              name="game"
               id="game"
               className="bg-zinc-900 py-3 px-4 rounded text-sm placeholder:text-zinc-500"
               defaultValue={""}
@@ -53,7 +66,11 @@ export function CreateAdModal() {
             <label htmlFor="name" className="font-semibold">
               Seu nome (ou nickname)
             </label>
-            <Input id="name" placeholder="Como te chamam dentro do game?" />
+            <Input
+              name="name"
+              id="name"
+              placeholder="Como te chamam dentro do game?"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-6">
@@ -71,7 +88,7 @@ export function CreateAdModal() {
               <label htmlFor="discord" className="font-semibold">
                 Qual seu Discord?
               </label>
-              <Input id="discord" placeholder="Usuario#0000" />
+              <Input name="discord" id="discord" placeholder="Usuario#0000" />
             </div>
           </div>
 
@@ -157,14 +174,31 @@ export function CreateAdModal() {
                 Qual horário do dia?
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <Input type="time" id="hourStart" placeholder="De" />
-                <Input type="time" id="hourEnd" placeholder="Até" />
+                <Input
+                  type="time"
+                  name="hourStart"
+                  id="hourStart"
+                  placeholder="De"
+                />
+                <Input
+                  type="time"
+                  name="hourEnd"
+                  id="hourEnd"
+                  placeholder="Até"
+                />
               </div>
             </div>
           </div>
 
           <label className="mt-2 flex gap-2 text-sm items-center cursor-pointer">
-            <Checkbox.Root className="w-6 h-6 p-1 rounded bg-zinc-900">
+            <Checkbox.Root
+              checked={useVoiceChannel}
+              onCheckedChange={(checked) => {
+                if (checked === true) setUseVoiceChannel(true);
+                else setUseVoiceChannel(false);
+              }}
+              className="w-6 h-6 p-1 rounded bg-zinc-900"
+            >
               <Checkbox.Indicator>
                 <Check size={16} className="text-emerald-400" />
               </Checkbox.Indicator>
