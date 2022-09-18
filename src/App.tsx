@@ -1,3 +1,4 @@
+import axios from "axios";
 import { MagnifyingGlassPlus } from "phosphor-react";
 
 import * as Dialog from "@radix-ui/react-dialog";
@@ -22,9 +23,7 @@ export default function App() {
   const [games, setGames] = useState<GameListData[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:3333/games")
-      .then((res) => res.json())
-      .then((data) => setGames(data));
+    axios("http://localhost:3333/games").then(({ data }) => setGames(data));
   }, []);
 
   return (

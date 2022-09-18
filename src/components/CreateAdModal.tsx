@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Check, GameController } from "phosphor-react";
 
 import * as Dialog from "@radix-ui/react-dialog";
@@ -14,20 +15,33 @@ export function CreateAdModal() {
   const [useVoiceChannel, setUseVoiceChannel] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:3333/games")
-      .then((res) => res.json())
-      .then((data) => setGames(data));
+    axios("http://localhost:3333/games").then(({ data }) => setGames(data));
   }, []);
 
-  const handleCreateAd = (event: FormEvent) => {
+  const handleCreateAd = async (event: FormEvent) => {
     event.preventDefault();
 
     const formData = new FormData(event.target as HTMLFormElement);
-
     const data = Object.fromEntries(formData);
 
-    console.log("foi ", data, formData);
-    console.log(useVoiceChannel);
+    if (!data.name) return;
+
+    try {
+      await axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+        name: data.name,
+        yearsPlaying: Number(data.yearsPlaying),
+        discord: data.discord,
+        weekDays: weekDays.map(Number),
+        hourStart: data.hourStart,
+        hourEnd: data.hourEnd,
+        useVoiceChannel: useVoiceChannel,
+      });
+
+      alert("Anúncio criado com sucesso!");
+    } catch (err) {
+      console.log(err);
+      alert("Erro ao criar anúncio!");
+    }
   };
 
   return (
@@ -79,6 +93,7 @@ export function CreateAdModal() {
                 Joga há quantos anos?
               </label>
               <Input
+                name="yearsPlaying"
                 id="yearsPlaying"
                 placeholder="Tudo bem ser ZERO"
                 type={"number"}
